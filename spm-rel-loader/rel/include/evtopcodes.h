@@ -1,6 +1,6 @@
 #pragma once
 
-enum EvtOpcodes {
+enum EvtOpcode : s16 {
     Next,
     EvtEnd,
     Return,
@@ -75,6 +75,7 @@ enum EvtOpcodes {
     Readf3,
     Readf4,
     ReadfN,
+    ClampInt,
     SetUserWrk,
     SetUserFlg,
     AllocUserWrk,
@@ -119,5 +120,8 @@ enum EvtOpcodes {
     DebugPutReg,
     DebugName,
     DebugRem,
-    DebugBp
+    DebugBp,
+    // Custom
+    Call,
+    ReturnFromCall
 };

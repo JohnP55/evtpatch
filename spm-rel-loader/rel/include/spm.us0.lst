@@ -470,7 +470,7 @@
 80104BC4:evt_npc_finish_flip_instant
 800e7388:evt_set_transition
 8010c65c:evt_seq_wait
-800d2420:evt_snd_bgmoff_f
+800d2420:evt_snd_bgmoff_f_d
 800d23f4:evt_snd_bgmoff
 80102a30:evt_wait_anim_end
 800f17ac:evt_mario_set_pose

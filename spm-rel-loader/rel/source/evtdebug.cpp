@@ -2,23 +2,23 @@
 #include "patch.h"
 
 #include <types.h>
+#include <msl/string.h>
 #include <spm/evtmgr_cmd.h>
-#include <wii/OSError.h>
-#include <wii/string.h>
+#include <wii/os.h>
 
 namespace mod {
 
 static s32 debugPutMsg(spm::evtmgr::EvtEntry * entry)
 {
     const char * str = (char *) spm::evtmgr_cmd::evtGetValue(entry, entry->pCurData[0]);
-    wii::OSError::OSReport("%s\n", str);
+    wii::os::OSReport("%s\n", str);
     return 2;
 }
 
 static s32 debugPutReg(s32 ret)
 {
     // Write to OSReport
-    wii::OSError::OSReport("%s\n", spm::evtmgr_cmd::evt_debug_put_reg_str);
+    wii::os::OSReport("%s\n", spm::evtmgr_cmd::evt_debug_put_reg_str);
     return ret;
 }
 
