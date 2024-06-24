@@ -16,7 +16,7 @@ eastl::stack<spm::evtmgr::EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry*
 s32 evtOpcodeCall(spm::evtmgr::EvtEntry* entry);
 s32 evtOpcodeReturnFromCall(spm::evtmgr::EvtEntry* entry);
 
-void evtmgrCmdExtensionInit();
+void evtmgrExtensionInit();
 s32 getLineOffset(spm::evtmgr::EvtScriptCode* script, s32 line);
 s32 getInstructionBlockLength(spm::evtmgr::EvtScriptCode* instruction, u32 limit);
 void insertTrampolineCall(spm::evtmgr::EvtScriptCode* ptr, spm::evtmgr::EvtScriptCode* script);

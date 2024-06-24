@@ -287,13 +287,11 @@ void main()
     checkForDolphin();
     exceptionPatch(); // Seeky's exception handler from Practice Codes
     romfontExpand(); // Font expansion patch from Practice Codes
-    evtpatch::evtmgrCmdExtensionInit(); // Initialize EVT scripting extension
+    evtpatch::evtmgrExtensionInit(); // Initialize EVT scripting extension
 
     spm::map_data::MapData * an1_04_md = spm::map_data::mapDataPtr("an1_04");
     spm::evtmgr::EvtScriptCode* jaydesRequestLink = evtpatch::getEvtInstruction(an1_04_md->initScript, 139);
-    wii::os::OSReport("%x\n", jaydesRequestLink);
     spm::evtmgr::EvtScriptCode* jaydesRequest = evtpatch::getInstructionArgv(jaydesRequestLink)[3];
-    wii::os::OSReport("%x\n", jaydesRequest);
     evtpatch::hookEvtReplaceBlock(jaydesRequest, 25, (spm::evtmgr::EvtScriptCode*)funnyCutscene, 179);
 }
 

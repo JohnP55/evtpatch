@@ -497,4 +497,4 @@
 80c230fc:evt_disp_func_rainbow
 800feac4:evt_npc_set_rgba
 80db0fc0:an1_04_init_evt
-// 80dadd38:jaydes_request_72
+800d9b14:evtDelete

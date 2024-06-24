@@ -13,7 +13,6 @@ namespace mod::evtpatch {
 
 using namespace spm::evtmgr;
 
-
 static eastl::map<spm::evtmgr::EvtEntry*, eastl::stack<EvtScriptCode*>*> returnStacks;
 
 eastl::stack<spm::evtmgr::EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry) {
@@ -30,16 +29,15 @@ eastl::stack<spm::evtmgr::EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry*
 s32 evtOpcodeCall(spm::evtmgr::EvtEntry* entry) {
     eastl::stack<spm::evtmgr::EvtScriptCode*>* curReturnStack = getReturnStack(entry);
     curReturnStack->push(entry->pCurInstruction);
-    entry->pCurInstruction = entry->pCurData[0];
+    entry->pCurInstruction = (EvtScriptCode*)entry->pCurData[0];
     wii::os::OSReport("OpcodeCall: return stack: [%x], from: [%x], to: [%x]\n", curReturnStack, entry->pPrevInstruction, entry->pCurInstruction);
-    return 2;
+    return EVT_RET_CONTINUE;
 }
 /// @brief Returns execution back to the previous location after EvtOpcodeCall
 /// @param entry The EVT entry
 /// @return EVT_RET_CONTINUE
 s32 evtOpcodeReturnFromCall(spm::evtmgr::EvtEntry* entry) {
     eastl::stack<spm::evtmgr::EvtScriptCode*>* curReturnStack = getReturnStack(entry);
-    assert(curReturnStack != nullptr);
     wii::os::OSReport("OpcodeReturnFromCall: return stack: [%x], from: [%x] to: [%x]\n", curReturnStack, entry->pCurInstruction, curReturnStack->top());
     entry->pCurInstruction = curReturnStack->top();
     curReturnStack->pop();
@@ -48,7 +46,7 @@ s32 evtOpcodeReturnFromCall(spm::evtmgr::EvtEntry* entry) {
         delete curReturnStack;
         returnStacks.erase(entry);
     }
-    return 2;
+    return EVT_RET_CONTINUE;
 }
 
 /// @brief Handles custom opcodes in evtmgrCmd
@@ -65,13 +63,31 @@ static s32 evtmgrCmdExtraCases(spm::evtmgr::EvtEntry* entry) {
     }
 }
 
-/// @brief Patches evtmgrCmd and other related code to allow and handle custom opcodes
-void evtmgrCmdExtensionInit() {
-    writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7B8, 0x7f63db78);
+static void evtmgrCmdExtensionPatch() {
+    writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7B8, 0x7f63db78); // mr r3, r27
     writeBranchLink(spm::evtmgr_cmd::evtmgrCmd, 0x7BC, evtmgrCmdExtraCases);
-    writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7C0, 0x7c7c1b78);
-    writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7C4, 0x4800000c);
-    writeWord(spm::evtmgr::make_jump_table, 0xe0, 0x48000020);
+    writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7C0, 0x7c7c1b78); // mr r28, r3
+    writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7C4, 0x4800000c); // blt 0xc -> b 0xc, bypassing 0x77 max opcode check
+    writeWord(spm::evtmgr::make_jump_table, 0xe0, 0x48000020); // blt 0x20 -> b 0x20, bypassing 0x77 max opcode check
+}
+static void (*evtDeleteReal)(EvtEntry*);
+static void evtDeleteReturnStackPatch() {
+    evtDeleteReal = patch::hookFunction(spm::evtmgr::evtDelete, [](EvtEntry* entry) {
+        auto stack = returnStacks.at(entry);
+        if (stack != nullptr) {
+            while (!stack->empty()) {
+                stack->pop();
+            }
+            delete stack;
+        }
+        return evtDeleteReal(entry);
+    });
+}
+
+/// @brief Patches evtmgrCmd and other related code to allow and handle custom opcodes
+void evtmgrExtensionInit() {
+    evtmgrCmdExtensionPatch();
+    evtDeleteReturnStackPatch();
 }
 
 const EvtScriptCode trampolineCall[] = { CALL(0) };
@@ -87,7 +103,7 @@ RETURN_FROM_CALL()
 
 /// @brief Gets the offset in EvtScriptCodes of a line from the start of an evt script
 /// @param script The evt script to look through
-/// @param line The line number to find the offset of, 0-indexed
+/// @param line The line number to find the offset of, 1-indexed
 /// @return The offset of the line, in EvtScriptCodes, from the start of the script
 s32 getLineOffset(EvtScriptCode* script, s32 line) {
     assert(isStartOfInstruction(script));
@@ -129,7 +145,7 @@ void insertTrampolineCall(EvtScriptCode* ptr, EvtScriptCode* script) {
 
 /// @brief Hooks into an evt script, automatically preserving original instructions
 /// @param script The evt script that will be hooked into
-/// @param line The line number to hook at, 0-indexed
+/// @param line The line number to hook at, 1-indexed
 /// @param dst The evt script that will be executed
 void hookEvt(EvtScriptCode* script, s32 line, EvtScriptCode* dst) {
     hookEvtByOffset(script, getLineOffset(script, line), dst);
@@ -155,7 +171,7 @@ void hookEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst) {
 
 /// @brief Adds a hook to another evt script, without preserving original instructions
 /// @param script The evt script that will be hooked into
-/// @param line The line number to hook at, 0-indexed
+/// @param line The line number to hook at, 1-indexed
 /// @param dst The evt script that will be executed
 void hookEvtReplace(EvtScriptCode* script, s32 line, EvtScriptCode* dst) {
     hookEvtReplaceByOffset(script, getLineOffset(script, line), dst);
@@ -178,9 +194,9 @@ void hookEvtReplaceByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* ds
 
 /// @brief Adds a hook to another evt script, without restoring original instructions and comes back at a specified offset
 /// @param script The evt script that will be hooked into
-/// @param lineStart The line number to hook at, 0-indexed
+/// @param lineStart The line number to hook at, 1-indexed
 /// @param dst The evt script that will be executed
-/// @param lineEnd The line number to come back to once `dst` is done executing, 0-indexed
+/// @param lineEnd The line number to come back to once `dst` is done executing, 1-indexed
 void hookEvtReplaceBlock(EvtScriptCode* script, s32 lineStart, EvtScriptCode* dst, s32 lineEnd) {
     hookEvtReplaceBlockByOffset(script, getLineOffset(script, lineStart), dst, getLineOffset(script, lineEnd));
 }
