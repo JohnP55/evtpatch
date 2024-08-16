@@ -12,7 +12,9 @@ namespace mod::evtpatch {
 #define RETURN_FROM_CALL() \
     EVT_HELPER_CMD(0, EvtOpcode::ReturnFromCall) };
 
+void evtmgrDestroyReturnStack(spm::evtmgr::EvtEntry* entry);
 eastl::stack<spm::evtmgr::EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry);
+
 s32 evtOpcodeCall(spm::evtmgr::EvtEntry* entry);
 s32 evtOpcodeReturnFromCall(spm::evtmgr::EvtEntry* entry);
 

@@ -291,7 +291,7 @@ void main()
 
     spm::map_data::MapData * an1_04_md = spm::map_data::mapDataPtr("an1_04");
     spm::evtmgr::EvtScriptCode* jaydesRequestLink = evtpatch::getEvtInstruction(an1_04_md->initScript, 139);
-    spm::evtmgr::EvtScriptCode* jaydesRequest = evtpatch::getInstructionArgv(jaydesRequestLink)[3];
+    spm::evtmgr::EvtScriptCode* jaydesRequest = reinterpret_cast<spm::evtmgr::EvtScriptCode*>(evtpatch::getInstructionArgv(jaydesRequestLink)[3]);
     evtpatch::hookEvtReplaceBlock(jaydesRequest, 25, (spm::evtmgr::EvtScriptCode*)funnyCutscene, 179);
 }
 

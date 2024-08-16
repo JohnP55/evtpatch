@@ -545,3 +545,4 @@
 804a2ee8:evt_memcard_save
 8010c6ac:evt_seq_mapchange
 800d9b14:evtDelete
+800d8cfc:evtmgrReInit
