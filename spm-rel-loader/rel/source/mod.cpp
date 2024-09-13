@@ -188,7 +188,7 @@ EVT_BEGIN(funnyCutscene)
     WAIT_MSEC(300)
     USER_FUNC(spm::evt_msg::evt_msg_print, EVT_MSG_FLAG_DIRECT, PTR("<p>A very long time ago, the\nPure Heart was hidden away\ninto a form so inconspicuous,\n<k><p>that it would never be\nrecognized as what it truly is\nif one seeked it.\n<k><p>However, I don't know how\nto undo that transformation\nby myself.<k>"), 0, PTR("enma"))
     WAIT_MSEC(500)
-    USER_FUNC(spm::evt_npc::evt_npc_set_position, "angel", 1100, 100, 0)
+    USER_FUNC(spm::evt_npc::evt_npc_set_position, PTR("angel"), 1100, 100, 0)
     USER_FUNC(spm::evt_msg::evt_msg_print, 0, PTR("stg7_1_123"), 0, PTR("angel")) // original fits already
     WAIT_MSEC(100)
     NPC_SPAWN_EXCLAMATION_MARK("enma")
@@ -203,7 +203,7 @@ EVT_BEGIN(funnyCutscene)
     NPC_SET_ANIMDEF_AND_ANIM("angel", animsLuvbiAngry, 0)
     USER_FUNC(spm::evt_npc::evt_npc_walk_to, PTR("angel"), 925, 0, 0, FLOAT(80.0), 1, 0, 0)
     WAIT_FRM(1)
-    USER_FUNC(spm::evt_npc::func_80108194, "angel", 0)
+    USER_FUNC(spm::evt_npc::func_80108194, PTR("angel"), 0)
     NPC_SET_ANIMDEF_AND_ANIM_LOOP("enma", animsJaydesThinkingAngry, 1, 0)
     WAIT_MSEC(25)
     USER_FUNC(spm::evt_msg::evt_msg_print, EVT_MSG_FLAG_DIRECT, PTR("<p>Mother!\n<k><p>I shan't meet mine prince hither!\nThy place fucking blows!<k>"), 0, PTR("angel"))
@@ -281,7 +281,7 @@ RETURN_FROM_CALL()
 void main()
 {
     wii::os::OSReport("SPM Rel Loader: the mod has ran!\n");
-    wii::os::OSReport("%x\n", spm::map_data::mapDataPtr("an1_04")->initScript);
+    wii::os::OSReport("%p\n", spm::map_data::mapDataPtr("an1_04")->initScript);
 
     titleScreenCustomTextPatch();
     checkForDolphin();

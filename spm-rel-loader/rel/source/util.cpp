@@ -1,6 +1,4 @@
 #include <common.h>
-#include <EASTL/string.h>
-#include <EASTL/vector.h>
 #include <msl/string.h>
 #include <spm/camdrv.h>
 #include <spm/evtmgr_cmd.h>
@@ -153,30 +151,6 @@ bool isPitEnemyRoom()
 {
     return msl::string::strncmp(spm::spmario::gp->mapName, "dan_0", 5) == 0  // Flipside 
         || msl::string::strncmp(spm::spmario::gp->mapName, "dan_4", 5) == 0; // Flopside
-}
-
-// Edited from https://stackoverflow.com/questions/50012684/how-to-split-a-stringextract-words-without-stringstream-and-strtok-in-c
-eastl::vector<eastl::string> split(eastl::string input, char delimiter) {
-    eastl::vector<eastl::string> attrs;
-    eastl::string word = "";
-
-    while (input.compare(word) != 0)
-    {
-        auto index = input.find_first_of(delimiter);
-        word = input.substr(0,index);
-
-        input = input.substr(index+1, input.length());
-
-        if (word.length() == 0) {
-            // skip space
-            continue;
-        }
-
-        // Add non-space word to vector
-        attrs.push_back(word);
-    }
-
-    return attrs;
 }
 
 }

@@ -123,6 +123,7 @@
 
 // evt_snd.c
 800d2148:evt_snd_bgmon
+800d2af4:evt_snd_sfxon_npc
 800d36f4:func_800d36f4
 // more
 
@@ -138,6 +139,8 @@
 // evtmgr.c
 800d87e4:evtGetWork
 800d8b88:evtEntry
+800d890c:make_jump_table
+800d8b2c:evtmgrReInit
 800d8df4:evtEntryType
 800d9060:evtChildEntry
 800d9370:evtBrotherEntry
@@ -153,6 +156,7 @@
 800de594:evtGetValue
 800de9b8:evtSetValue
 800df1fc:evtSetFloat
+800dff20:evt_cam3d_evt_zoom_in
 // bss
 8050ce30:evt_debug_put_reg_str
 // more
@@ -171,6 +175,10 @@
 // more
 // sdata
 805ae020:evt_door_wp
+
+// evt_eff.c
+800e57bc:evt_eff
+// more
 
 // evt_fade.c
 800e7100:evt_fade_end_wait
@@ -201,6 +209,7 @@
 800ef650:evt_mario_key_off
 800ef62c:evt_mario_key_on
 800efa4c:evt_mario_get_pos
+800f1954:evt_mario_set_pose
 800f25b0:evt_set_gravity
 // more
 
@@ -233,7 +242,7 @@
 801039b8:evt_npc_animflag_onoff
 80104c94:evt_npc_set_property
 80104fac:evt_npc_modify_part
-801059d0:func_801059d0
+801059d0:evt_npc_set_axis_movement_unit
 80106724:evt_npc_entry_from_template
 80107cfc:func_80107cfc
 80107d20:func_80107d20

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <evt_cmd.h>
-#include <evtopcodes.h>
 #include <spm/system.h>
-#include <EASTL/stack.h>
+#include "evtopcodes.h"
+#include "stack.hh"
 
 namespace mod::evtpatch {
 
@@ -12,8 +12,8 @@ namespace mod::evtpatch {
 #define RETURN_FROM_CALL() \
     EVT_HELPER_CMD(0, EvtOpcode::ReturnFromCall) };
 
-void evtmgrDestroyReturnStack(spm::evtmgr::EvtEntry* entry);
-eastl::stack<spm::evtmgr::EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry);
+void evtmgrDestroyReturnStack(s32 entryId);
+Stack<spm::evtmgr::EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry);
 
 s32 evtOpcodeCall(spm::evtmgr::EvtEntry* entry);
 s32 evtOpcodeReturnFromCall(spm::evtmgr::EvtEntry* entry);
@@ -52,7 +52,7 @@ inline bool isStartOfInstruction(spm::evtmgr::EvtScriptCode instruction) {
 /// @param instruction A pointer to the instruction to validate
 /// @return Whether it seems to be a valid start of instruction
 inline bool isStartOfInstruction(spm::evtmgr::EvtScriptCode* instruction) {
-    if (instruction <= 0x80000000 || instruction >= 0x817fffff) return false;
+    if ((u32)instruction <= 0x80000000 || (u32)instruction >= 0x817fffff) return false;
     return isStartOfInstruction(*instruction); // if you see an evt opcode with more than 256 arguments lmk :)
 }
 /// @brief Gets the length of an instruction, in EvtScriptCodes (int32s)
