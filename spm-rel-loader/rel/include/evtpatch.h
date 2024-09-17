@@ -89,8 +89,11 @@ inline spm::evtmgr::EvtScriptCode* getEvtInstruction(spm::evtmgr::EvtScriptCode*
     return script + getLineOffset(script, line);
 }
 
+/// @brief Takes an EvtEntry and returns its index in EvtWork's evtEntries array.
+/// @param entry The EvtEntry
+/// @return The index of the EvtEntry in EvtWork's evtEntries array
 inline s32 getEvtEntryIdx(spm::evtmgr::EvtEntry* entry) {
-
+    return reinterpret_cast<s32>(entry - spm::evtmgr::evtGetWork()->entries);
 }
 
 }

@@ -15,22 +15,22 @@ static Stack<EvtScriptCode*>* returnStacks[EVT_ENTRY_MAX];
 
 /// @brief Clears all entries in an EvtEntry's return stack, then destroys the stack and all references to it.
 /// @param entryId The EvtEntry's Id
-void evtmgrDestroyReturnStack(s32 entryId) {
-    Stack<EvtScriptCode*>* stack = returnStacks[entryId];
+void evtmgrDestroyReturnStack(s32 entryIdx) {
+    Stack<EvtScriptCode*>* stack = returnStacks[entryIdx];
     if (stack != nullptr) {
-        wii::os::OSReport("evtmgrDestroyReturnStack: Destroying return stack for entry #%d\n", entryId);
+        wii::os::OSReport("evtmgrDestroyReturnStack: Destroying return stack for entry at index [%d]\n", entryIdx);
         stack->clear();
         delete stack;
-        returnStacks[entryId] = nullptr;
+        returnStacks[entryIdx] = nullptr;
     }
 }
 
 Stack<EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry) {
-    Stack<EvtScriptCode*>* stack = returnStacks[entry->id];
+    Stack<EvtScriptCode*>* stack = returnStacks[getEvtEntryIdx(entry)];
     if (stack == nullptr) {
-        wii::os::OSReport("getReturnStack: Creating return stack for EvtEntry [0x%d]\n", entry->id);
-        returnStacks[entry->id] = new Stack<EvtScriptCode*>();
-        stack = returnStacks[entry->id];
+        wii::os::OSReport("getReturnStack: Creating return stack for EvtEntry at offset [%d]\n", getEvtEntryIdx(entry));
+        returnStacks[getEvtEntryIdx(entry)] = new Stack<EvtScriptCode*>();
+        stack = returnStacks[getEvtEntryIdx(entry)];
     }
     return stack;
 }
@@ -42,7 +42,7 @@ s32 evtOpcodeCall(spm::evtmgr::EvtEntry* entry) {
     Stack<EvtScriptCode*>* curReturnStack = getReturnStack(entry);
     curReturnStack->push(entry->pCurInstruction);
     entry->pCurInstruction = (EvtScriptCode*)entry->pCurData[0];
-    wii::os::OSReport("OpcodeCall: pushed return stack for EvtEntry [0x%p] at [0x%p], from: [0x%p] to: [0x%p]\n", entry, curReturnStack, entry->pPrevInstruction, entry->pCurInstruction);
+    wii::os::OSReport("OpcodeCall: pushed return stack for EvtEntry [%p] at [%p], from: [%p] to: [%p]\n", entry, curReturnStack, entry->pPrevInstruction, entry->pCurInstruction);
     return EVT_RET_CONTINUE;
 }
 
@@ -51,11 +51,11 @@ s32 evtOpcodeCall(spm::evtmgr::EvtEntry* entry) {
 /// @return EVT_RET_CONTINUE
 s32 evtOpcodeReturnFromCall(spm::evtmgr::EvtEntry* entry) {
     Stack<EvtScriptCode*>* curReturnStack = getReturnStack(entry);
-    wii::os::OSReport("OpcodeReturnFromCall: return stack: [0x%p], from: [0x%p] to: [0x%p]\n", curReturnStack, entry->pCurInstruction, curReturnStack->peek());
+    wii::os::OSReport("OpcodeReturnFromCall: return stack: [%p], from: [%p] to: [%p]\n", curReturnStack, entry->pCurInstruction, curReturnStack->peek());
     entry->pCurInstruction = curReturnStack->pop();
     if (curReturnStack->isEmpty()) {
-        wii::os::OSReport("Return stack for evtEntry [0x%p] is empty; It will now be freed.\n", entry);
-        evtmgrDestroyReturnStack(entry->id);
+        wii::os::OSReport("Return stack for evtEntry [%p] is empty; It will now be freed.\n", entry);
+        evtmgrDestroyReturnStack(getEvtEntryIdx(entry));
     }
     return EVT_RET_CONTINUE;
 }
@@ -86,7 +86,7 @@ static void evtmgrCmdExtensionPatch() {
 static void (*evtDeleteReal)(EvtEntry*);
 static void evtDeletePatch() {
     evtDeleteReal = patch::hookFunction(spm::evtmgr::evtDelete, [](EvtEntry* entry) {
-        evtmgrDestroyReturnStack(entry->id);
+        evtmgrDestroyReturnStack(getEvtEntryIdx(entry));
         return evtDeleteReal(entry);
     });
 }
@@ -127,7 +127,7 @@ RETURN_FROM_CALL()
 /// @return The offset of the line, in EvtScriptCodes, from the start of the script
 s32 getLineOffset(EvtScriptCode* script, s32 line) {
     assert(isStartOfInstruction(script));
-    wii::os::OSReport("getLineOffset(): script: [0x%p], line: %d\n", script, line);
+    wii::os::OSReport("getLineOffset(): script: [%p], line: %d\n", script, line);
     EvtScriptCode* instruction = script;
     s32 offset = 0;
     for (int i = 0; i < line-1; i++) { // 1-indexed

@@ -52,7 +52,7 @@ public:
     }
 
     void clear() {
-        while (isEmpty()) {
+        while (!isEmpty()) {
             (void)pop();
         }
     }
