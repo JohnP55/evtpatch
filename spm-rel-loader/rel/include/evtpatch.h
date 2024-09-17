@@ -46,7 +46,7 @@ inline u32 getOpcode(spm::evtmgr::EvtScriptCode instruction) {
 /// @param instruction The instruction word to validate
 /// @return Whether it seems to be a valid start of instruction
 inline bool isStartOfInstruction(spm::evtmgr::EvtScriptCode instruction) {
-    return getNumArgs(instruction) < 0x100 && getOpcode(instruction) < EVT_max; // if you see an evt opcode with more than 256 arguments lmk :)
+    return getNumArgs(instruction) < 0x100 && getOpcode(instruction) < EvtOpcode::Max; // if you see an evt opcode with more than 256 arguments lmk :)
 }
 /// @brief Checks if a given EvtScriptCode is likely the start of an instruction (Not 100% guaranteed)
 /// @param instruction A pointer to the instruction to validate
@@ -87,6 +87,10 @@ inline spm::evtmgr::EvtScriptCode* getInstructionArgv(spm::evtmgr::EvtScriptCode
 inline spm::evtmgr::EvtScriptCode* getEvtInstruction(spm::evtmgr::EvtScriptCode* script, s32 line) {
     assert(isStartOfInstruction(script)); // Cannot hook on non-instruction, what are you doing :sob:
     return script + getLineOffset(script, line);
+}
+
+inline s32 getEvtEntryIdx(spm::evtmgr::EvtEntry* entry) {
+
 }
 
 }

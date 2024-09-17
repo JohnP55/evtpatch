@@ -1,5 +1,6 @@
 #pragma once
 #include <spm/evt_npc.h>
+#include <spm/npcdrv.h>
 
 namespace mod::cutscene_helpers
 {
