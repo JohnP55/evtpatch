@@ -7,6 +7,7 @@
 #include <wii/gx.h>
 #include <wii/mtx.h>
 #include <wii/os.h>
+#include <wii/os/OSContext.h>
 #include <wii/vi.h>
 #include <msl/string.h>
 
@@ -31,7 +32,7 @@ extern "C" {
 static bool inException = false;
 static char exceptionText[4096];
 static u32 head = 0;
-static void (*__OSUnhandledExceptionReal)(s32 p1, s32 p2, s32 p3, s32 p4);
+static void (*__OSUnhandledExceptionReal)(u8 p1, wii::os::OSContext* p2, u32 p3, u32 p4);
 static spm::evtmgr::EvtScriptCode * lastScript = nullptr;
 static s32 (*evtmgrCmdReal)(spm::evtmgr::EvtEntry * entry) = nullptr;
 
@@ -67,11 +68,11 @@ static void draw(char * msg, f32 yShift, f32 scale)
         char * q = p;
         while ((*q != '\n') && (*q != '\0'))
             q++;
-        
+
         // Split line into its own string temporarily
         done = *q == '\0';
         *q = '\0';
-        
+
         // Draw line if on screen
         if ((y >= TEXT_BOTTOM) && (y <= TEXT_TOP))
             spm::romfont::romFontPrintGX(x, y, scale, &colours::white, p);
@@ -171,7 +172,7 @@ extern "C" void exceptionOSReport(const char * msg)
     // Store message to be drawn to screen
     size_t len = msl::string::strlen(msg);
     if ((head + len) >= sizeof(exceptionText))
-        return;    
+        return;
     msl::string::strcpy(exceptionText + head, msg);
     head += len;
 }
@@ -194,15 +195,15 @@ void checkExceptionFlags()
 }
 
 void exceptionPatch()
-{   
+{
     // OSPanic
-    writeBranch(wii::os::OSPanic, 0x130, OSPanicForwarder); 
+    writeBranch(wii::os::OSPanic, 0x130, OSPanicForwarder);
 
     // __OSUnhandledException
     writeBranchLink(wii::os::__OSUnhandledException, 0x50,  exceptionOSReportForwarder);
     writeBranchLink(wii::os::__OSUnhandledException, 0x1b0, exceptionOSReportForwarder);
     writeBranchLink(wii::os::__OSUnhandledException, 0x1bc, exceptionOSReportForwarder);
-    writeBranchLink(wii::os::__OSUnhandledException, 0x1d8, exceptionOSReportForwarder);    
+    writeBranchLink(wii::os::__OSUnhandledException, 0x1d8, exceptionOSReportForwarder);
     writeBranchLink(wii::os::__OSUnhandledException, 0x1ec, exceptionOSReportForwarder);
     writeBranchLink(wii::os::__OSUnhandledException, 0x220, exceptionOSReportForwarder);
     writeBranchLink(wii::os::__OSUnhandledException, 0x234, exceptionOSReportForwarder);
@@ -215,7 +216,7 @@ void exceptionPatch()
     writeBranchLink(wii::os::__OSUnhandledException, 0x2d0, exceptionOSReportForwarder);
     writeBranch(wii::os::__OSUnhandledException, 0x2d4, exceptionDraw);
     __OSUnhandledExceptionReal = patch::hookFunction(wii::os::__OSUnhandledException,
-        [](s32 p1, s32 p2, s32 p3, s32 p4)
+        [](u8 p1, wii::os::OSContext* p2, u32 p3, u32 p4)
         {
             checkExceptionFlags();
             inException = true;

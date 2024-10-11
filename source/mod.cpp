@@ -27,14 +27,14 @@
 #include <spm/npcdrv.h>
 #include <spm/seqdef.h>
 #include <spm/seqdrv.h>
-#include <spm/rel/an1_04.h>
 #include <msl/stdio.h>
 #include <msl/string.h>
 #include <wii/ipc.h>
 #include <wii/os.h>
- 
+
 namespace mod {
 
+#define EVT_MSG_FLAG_DIRECT 1
 bool gIsDolphin;
 
 /*

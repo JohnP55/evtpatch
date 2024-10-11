@@ -70,7 +70,7 @@ static s32 evtmgrCmdExtraCases(spm::evtmgr::EvtEntry* entry) {
         case EvtOpcode::ReturnFromCall:
             return evtOpcodeReturnFromCall(entry);
         default:
-            assert(0);
+            assert(0, "evtmgrCmdExtraCases error");
             __builtin_unreachable();
     }
 }
@@ -126,7 +126,7 @@ RETURN_FROM_CALL()
 /// @param line The line number to find the offset of, 1-indexed
 /// @return The offset of the line, in EvtScriptCodes, from the start of the script
 s32 getLineOffset(EvtScriptCode* script, s32 line) {
-    assert(isStartOfInstruction(script));
+    assert(isStartOfInstruction(script), "Cannot hook on non-instruction, what are you doing :sob:");
     wii::os::OSReport("getLineOffset(): script: [%p], line: %d\n", script, line);
     EvtScriptCode* instruction = script;
     s32 offset = 0;
@@ -176,8 +176,8 @@ void hookEvt(EvtScriptCode* script, s32 line, EvtScriptCode* dst) {
 /// @param dst The evt script that will be executed
 void hookEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst) {
     EvtScriptCode* src = script + offset;
-    assert(isStartOfInstruction(src)); // Cannot hook on non-instruction, what are you doing :sob:
-    
+    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:"); // Cannot hook on non-instruction, what are you doing :sob:
+
     u32 lenOriginalInstructions = getInstructionBlockLength(src, TRAMPOLINE_CALL_LENGTH);
     u32 sizeOriginalInstructions = lenOriginalInstructions * sizeof(EvtScriptCode);
 
@@ -202,11 +202,11 @@ void hookEvtReplace(EvtScriptCode* script, s32 line, EvtScriptCode* dst) {
 /// @param dst The evt script that will be executed
 void hookEvtReplaceByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst) {
     EvtScriptCode* src = script + offset;
-    assert(isStartOfInstruction(src)); // Cannot hook on non-instruction, what are you doing :sob:
-    
+    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:"); // Cannot hook on non-instruction, what are you doing :sob:
+
     u32 lenOriginalInstructions = getInstructionBlockLength(src, TRAMPOLINE_CALL_LENGTH);
     u32 sizeOriginalInstructions = lenOriginalInstructions * sizeof(EvtScriptCode);
-    
+
     msl::string::memset(src, 0, sizeOriginalInstructions); // pad anything left with 0s
     insertTrampolineCall(src, dst);
 }
@@ -229,7 +229,7 @@ void hookEvtReplaceBlock(EvtScriptCode* script, s32 lineStart, EvtScriptCode* ds
 void hookEvtReplaceBlockByOffset(EvtScriptCode* script, s32 offsetStart, EvtScriptCode* dst, s32 offsetEnd) {
     EvtScriptCode* src = script + offsetStart;
     s32 length = offsetEnd-offsetStart;
-    assert(isStartOfInstruction(src)); // Cannot hook on non-instruction, what are you doing :sob:
+    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:"); // Cannot hook on non-instruction, what are you doing :sob:
     msl::string::memset(src, 0, length * sizeof(EvtScriptCode)); // if i have time i'll change offsets to be in bytes like a normal person
     insertTrampolineCall(src, dst);
 }

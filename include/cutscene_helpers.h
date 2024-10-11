@@ -5,6 +5,8 @@
 namespace mod::cutscene_helpers
 {
 
+#define NPC_PROPERTY_ANIM_DEF 14
+
 #define SET_CHAR_ANIMS(instanceName, tribeAnimDef) \
     USER_FUNC(spm::evt_npc::evt_npc_set_property, PTR(instanceName), spm::npcdrv::NPCProperty::ANIMS, PTR(tribeAnimDef))
 
