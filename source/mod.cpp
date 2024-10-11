@@ -32,7 +32,7 @@
 #include <msl/string.h>
 #include <wii/ipc.h>
 #include <wii/os.h>
-
+ 
 namespace mod {
 
 bool gIsDolphin;
