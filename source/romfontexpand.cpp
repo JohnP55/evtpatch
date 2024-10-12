@@ -1,8 +1,10 @@
 #include <common.h>
-#include <msl/string.h>
 #include <spm/memory.h>
 #include <spm/romfont.h>
 #include <wii/os.h>
+#include <msl/string.h>
+
+#include "util.h"
 
 namespace mod {
 
@@ -20,7 +22,7 @@ char newChars[][2] = {"0", "1", "2", "3", "4", "5", "6", "7",
 #endif
                       };
 
-#define NEW_CHAR_COUNT sizeof(newChars)/sizeof(newChars[0])
+#define NEW_CHAR_COUNT ARRAY_SIZEOF(newChars)
 
 void romfontExpand()
 {
@@ -50,7 +52,7 @@ void romfontExpand()
     // Add new characters
     for (u32 i = 0; i < NEW_CHAR_COUNT; i++)
     {
-        int width;
+        s32 width;
         wii::os::OSGetFontTexel(newChars[i], newEntries[originalCount + i].image, 0, 6, &width);
         newEntries[originalCount + i].character = newChars[i][0];
         newEntries[originalCount + i].width = width;
