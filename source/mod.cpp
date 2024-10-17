@@ -173,8 +173,10 @@ const char diaryScreenEnding[] = "<se 2>"
 "<k>";
 
 EVT_BEGIN(funnyCutscene)
+    //LBL(0)
     USER_FUNC(spm::evt_msg::evt_msg_print, EVT_MSG_FLAG_DIRECT, PTR("<p>I do, indeed, have a Pure\nHeart to offer to you, heroes.\n<k><p>However, I cannot give it\nto you as promised.<k>"), 0, PTR("enma"))
     WAIT_MSEC(250)
+    //GOTO(0)
     MARIO_SPAWN_QUESTION_MARK()
     USER_FUNC(spm::evt_mario::evt_mario_set_pose, PTR("T_10"), 0)
     WAIT_MSEC(1000)

@@ -88,6 +88,7 @@ s32 evt_patch_lbl(EvtEntry* entry)
       break;
     }
   }
+  return EVT_RET_CONTINUE;
 }
 
 static void evtmgrCmdExtensionPatch() {
