@@ -35,9 +35,9 @@ Stack<EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry) {
     return stack;
 }
 
-EVT_BEGIN(search_jump_table)
-  MAKE_JUMP_TABLE()
-RETURN_FROM_CALL() // needs to be RETURN_FROM_CALL instead of EVT_END in order to automatically pop the stack and move on to the custom script
+//EVT_BEGIN(search_jump_table)
+//  USER_FUNC(evtpatch::evt_patch_make_jump_table)
+//RETURN_FROM_CALL() // needs to be RETURN_FROM_CALL instead of EVT_END in order to automatically pop the stack and move on to the custom script
 
 /// @brief Jumps execution of an EVT entry to a specified location
 /// @param entry The EVT entry
@@ -45,12 +45,8 @@ RETURN_FROM_CALL() // needs to be RETURN_FROM_CALL instead of EVT_END in order t
 s32 evtOpcodeCall(spm::evtmgr::EvtEntry* entry) {
     Stack<EvtScriptCode*>* curReturnStack = getReturnStack(entry);
     curReturnStack->push(entry->pCurInstruction);
-
-    // Push the script to the top of the stack so that MAKE_JUMP_TABLE can access it and it'll be played after the jump table is finished
-    curReturnStack->push((EvtScriptCode*)entry->pCurData[0]);
-
-    // Set the current instruction to MAKE_JUMP_TABLE
-    entry->pCurInstruction = (EvtScriptCode*)search_jump_table;
+    evt_patch_make_jump_table(entry, (EvtScriptCode*)entry->pCurData[0]);
+    entry->pCurInstruction = (EvtScriptCode*)entry->pCurData[0];
     wii::os::OSReport("OpcodeCall: pushed return stack for EvtEntry [%p] at [%p], from: [%p] to: [%p]\n", entry, curReturnStack, entry->pPrevInstruction, entry->pCurInstruction);
     return EVT_RET_CONTINUE;
 }
@@ -85,7 +81,7 @@ static s32 evtmgrCmdExtraCases(spm::evtmgr::EvtEntry* entry) {
 }
 
 // Creates jump tables for scripts used by evtpatch
-s32 evt_patch_make_jump_table(EvtEntry* entry, bool firstRun)
+void evt_patch_make_jump_table(EvtEntry* sourceEntry, EvtScriptCode* destEntry)
 {
 
   s32 n;
@@ -93,9 +89,9 @@ s32 evt_patch_make_jump_table(EvtEntry* entry, bool firstRun)
   s32 cmd;
   s32 cmdn;
   s32 id;
-  Stack<EvtScriptCode*>* curReturnStack = getReturnStack(entry);
+  pScriptHead = destEntry;
   n = 0;
-  pScriptHead = curReturnStack->peek(); //evtOpcodeCall pushes the script we need to search through to the top of the stack so we peek at it here
+
   while (true)
   {
       cmd = *pScriptHead & 0xffff;
@@ -114,14 +110,14 @@ s32 evt_patch_make_jump_table(EvtEntry* entry, bool firstRun)
               goto end;
 
           case 3:
-              entry->labelIds[n] = (s8) id;
-              entry->jumptable[n] = pScriptHead;
+              sourceEntry->labelIds[n] = (s8) id;
+              sourceEntry->jumptable[n] = pScriptHead;
               n++;
           break;
       }
 
   }
-  end: return EVT_RET_CONTINUE;
+  end: return;
 }
 
 // Adds a label to the table if MAKE_JUMP_TABLE misses it

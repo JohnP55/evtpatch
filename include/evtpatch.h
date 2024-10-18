@@ -12,10 +12,7 @@ namespace mod::evtpatch {
 #define RETURN_FROM_CALL() \
     EVT_HELPER_CMD(0, EvtOpcode::ReturnFromCall) };
 
-EVT_DECLARE_USER_FUNC(evt_patch_make_jump_table, 0);
-
-#define MAKE_JUMP_TABLE() \
-  USER_FUNC(evtpatch::evt_patch_make_jump_table)
+void evt_patch_make_jump_table(spm::evtmgr::EvtEntry* sourceEntry, spm::evtmgr::EvtScriptCode* destEntry);
 
 void evtmgrDestroyReturnStack(s32 entryId);
 Stack<spm::evtmgr::EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry);
