@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/L5050/spm-headers.git
+	branch = dev
+	commit = e314e347cecca886925524c911356782f8499314
+	parent = d9380e66549cba8a788399316871213b0c4e1930
+	method = merge
+	cmdver = 0.4.6
