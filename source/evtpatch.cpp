@@ -116,30 +116,12 @@ void evt_patch_make_jump_table(EvtEntry* sourceEntry, EvtScriptCode* destEntry)
   end: return;
 }
 
-// Adds a label to the table if MAKE_JUMP_TABLE misses it
-s32 evt_patch_lbl(EvtEntry* entry)
-{
-  s32 index = spm::evtmgr_cmd::evtGetValue(entry, entry->pCurData[0]);
-  for (int i = 0; i < 16; i++)
-  {
-    if (entry->labelIds[i] == index) break;
-    if (entry->labelIds[i] < 0)
-    {
-      entry->labelIds[i] = index;
-      entry->jumptable[i] = entry->pCurInstruction;
-      break;
-    }
-  }
-  return EVT_RET_CONTINUE;
-}
-
 static void evtmgrCmdExtensionPatch() {
     writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7B8, 0x7f63db78); // mr r3, r27
     writeBranchLink(spm::evtmgr_cmd::evtmgrCmd, 0x7BC, evtmgrCmdExtraCases);
     writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7C0, 0x7c7c1b78); // mr r28, r3
     writeWord(spm::evtmgr_cmd::evtmgrCmd, 0x7C4, 0x4800000c); // blt 0xc -> b 0xc, bypassing 0x77 max opcode check
     writeWord(spm::evtmgr::make_jump_table, 0xe0, 0x48000020); // blt 0x20 -> b 0x20, bypassing 0x77 max opcode check
-    patch::hookFunction(spm::evtmgr_cmd::evt_lbl, evt_patch_lbl);
 }
 
 static void (*evtDeleteReal)(EvtEntry*);
