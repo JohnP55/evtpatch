@@ -35,10 +35,6 @@ Stack<EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry) {
     return stack;
 }
 
-//EVT_BEGIN(search_jump_table)
-//  USER_FUNC(evtpatch::evt_patch_make_jump_table)
-//RETURN_FROM_CALL() // needs to be RETURN_FROM_CALL instead of EVT_END in order to automatically pop the stack and move on to the custom script
-
 /// @brief Jumps execution of an EVT entry to a specified location
 /// @param entry The EVT entry
 /// @return EVT_RET_CONTINUE
