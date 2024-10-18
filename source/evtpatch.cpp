@@ -41,8 +41,9 @@ Stack<EvtScriptCode*>* getReturnStack(spm::evtmgr::EvtEntry* entry) {
 s32 evtOpcodeCall(spm::evtmgr::EvtEntry* entry) {
     Stack<EvtScriptCode*>* curReturnStack = getReturnStack(entry);
     curReturnStack->push(entry->pCurInstruction);
-    evt_patch_make_jump_table(entry, (EvtScriptCode*)entry->pCurData[0]);
-    entry->pCurInstruction = (EvtScriptCode*)entry->pCurData[0];
+    EvtScriptCode* destScript = (EvtScriptCode*)entry->pCurData[0];
+    evt_patch_make_jump_table(entry, destScript);
+    entry->pCurInstruction = destScript;
     wii::os::OSReport("OpcodeCall: pushed return stack for EvtEntry [%p] at [%p], from: [%p] to: [%p]\n", entry, curReturnStack, entry->pPrevInstruction, entry->pCurInstruction);
     return EVT_RET_CONTINUE;
 }
@@ -76,44 +77,45 @@ static s32 evtmgrCmdExtraCases(spm::evtmgr::EvtEntry* entry) {
     }
 }
 
-// Creates jump tables for scripts used by evtpatch
-void evt_patch_make_jump_table(EvtEntry* sourceEntry, EvtScriptCode* destEntry)
+/// @brief Updates the jump table of a parent script to include GOTOs used by evtpatch child scripts
+/// @param parentEntry The EvtEntry of the script being hooked on
+/// @param childEntry The evtpatch child script
+void evt_patch_make_jump_table(EvtEntry* parentEntry, EvtScriptCode* childScript)
 {
+    s32 n;
+    EvtScriptCode * pScriptHead;
+    s32 cmd;
+    s32 cmdn;
+    s32 id;
+    pScriptHead = destEntry;
+    n = 0;
 
-  s32 n;
-  EvtScriptCode * pScriptHead;
-  s32 cmd;
-  s32 cmdn;
-  s32 id;
-  pScriptHead = destEntry;
-  n = 0;
+    while (true)
+    {
+        cmd = *pScriptHead & 0xffff;
+        cmdn = *pScriptHead >> 16;
+        pScriptHead++;
 
-  while (true)
-  {
-      cmd = *pScriptHead & 0xffff;
-      cmdn = *pScriptHead >> 16;
-      pScriptHead++;
+        id = *pScriptHead;
+        pScriptHead += cmdn;
 
-      id = *pScriptHead;
-      pScriptHead += cmdn;
+        switch (cmd)
+        {
+            case 1:
+                goto end;
 
-      switch (cmd)
-      {
-          case 1:
-              goto end;
+            case EvtOpcode::ReturnFromCall:
+                goto end;
 
-          case EvtOpcode::ReturnFromCall:
-              goto end;
+            case 3:
+                sourceEntry->labelIds[n] = (s8) id;
+                sourceEntry->jumptable[n] = pScriptHead;
+                n++;
+            break;
+        }
 
-          case 3:
-              sourceEntry->labelIds[n] = (s8) id;
-              sourceEntry->jumptable[n] = pScriptHead;
-              n++;
-          break;
-      }
-
-  }
-  end: return;
+    }
+    end: return;
 }
 
 static void evtmgrCmdExtensionPatch() {
@@ -217,7 +219,7 @@ void hookEvt(EvtScriptCode* script, s32 line, EvtScriptCode* dst) {
 /// @param dst The evt script that will be executed
 void hookEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst) {
     EvtScriptCode* src = script + offset;
-    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:"); // Cannot hook on non-instruction, what are you doing :sob:
+    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:");
 
     u32 lenOriginalInstructions = getInstructionBlockLength(src, TRAMPOLINE_CALL_LENGTH);
     u32 sizeOriginalInstructions = lenOriginalInstructions * sizeof(EvtScriptCode);
@@ -237,13 +239,14 @@ void hookEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst) {
 void hookEvtReplace(EvtScriptCode* script, s32 line, EvtScriptCode* dst) {
     hookEvtReplaceByOffset(script, getLineOffset(script, line), dst);
 }
+
 /// @brief Adds a hook to another evt script, without restoring original instructions
 /// @param script The evt script that will be hooked into
 /// @param offset The offset to hook at, in EvtScriptCodes, from the start of the script
 /// @param dst The evt script that will be executed
 void hookEvtReplaceByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst) {
     EvtScriptCode* src = script + offset;
-    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:"); // Cannot hook on non-instruction, what are you doing :sob:
+    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:");
 
     u32 lenOriginalInstructions = getInstructionBlockLength(src, TRAMPOLINE_CALL_LENGTH);
     u32 sizeOriginalInstructions = lenOriginalInstructions * sizeof(EvtScriptCode);
@@ -270,7 +273,7 @@ void hookEvtReplaceBlock(EvtScriptCode* script, s32 lineStart, EvtScriptCode* ds
 void hookEvtReplaceBlockByOffset(EvtScriptCode* script, s32 offsetStart, EvtScriptCode* dst, s32 offsetEnd) {
     EvtScriptCode* src = script + offsetStart;
     s32 length = offsetEnd-offsetStart;
-    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:"); // Cannot hook on non-instruction, what are you doing :sob:
+    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:");
     msl::string::memset(src, 0, length * sizeof(EvtScriptCode)); // if i have time i'll change offsets to be in bytes like a normal person
     insertTrampolineCall(src, dst);
 }
