@@ -87,7 +87,7 @@ void evt_patch_make_jump_table(EvtEntry* parentEntry, EvtScriptCode* childScript
     s32 cmd;
     s32 cmdn;
     s32 id;
-    pScriptHead = destEntry;
+    pScriptHead = childScript;
     n = 0;
 
     while (true)
@@ -108,8 +108,8 @@ void evt_patch_make_jump_table(EvtEntry* parentEntry, EvtScriptCode* childScript
                 goto end;
 
             case 3:
-                sourceEntry->labelIds[n] = (s8) id;
-                sourceEntry->jumptable[n] = pScriptHead;
+                parentEntry->labelIds[n] = (s8) id;
+                parentEntry->jumptable[n] = pScriptHead;
                 n++;
             break;
         }
