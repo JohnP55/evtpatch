@@ -17,4 +17,10 @@ namespace mod::evtbackup {
   // evt_restoreLocalWork(s32 index, EvtVar value)
   EVT_DECLARE_USER_FUNC(evt_restoreLocalWork, 2)
 
+    // backs up all local work to the stack
+    EVT_DECLARE_USER_FUNC(evt_backupLocalWorkAll, 0)
+
+    // restores all local work from the stack
+    EVT_DECLARE_USER_FUNC(evt_restoreLocalWorkAll, 0)
+
 }
