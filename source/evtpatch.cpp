@@ -1,5 +1,6 @@
 #include "evtpatch.h"
 #include "evtopcodes.h"
+#include "evtbackup.h"
 #include "patch.h"
 #include <msl/string.h>
 #include <spm/evtmgr_cmd.h>
@@ -10,6 +11,7 @@
 namespace mod::evtpatch {
 
 using namespace spm::evtmgr;
+using namespace mod::evtbackup;
 
 static Stack<EvtScriptCode*>* returnStacks[EVT_ENTRY_MAX];
 
@@ -138,6 +140,7 @@ static void (*evtmgrReInitReal)();
 static void evtmgrReInitPatch() {
     evtmgrReInitReal = patch::hookFunction(spm::evtmgr::evtmgrReInit, []() {
         for (s32 i = 0; i < EVT_ENTRY_MAX; i++) {
+            destroyStack(i);
             if (returnStacks[i] != nullptr) {
                 evtmgrDestroyReturnStack(i);
             }

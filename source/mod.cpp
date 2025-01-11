@@ -2,6 +2,7 @@
 #include "cutscene_helpers.h"
 #include "evt_cmd.h"
 #include "evtpatch.h"
+#include "evtbackup.h"
 #include "exception.h"
 #include "patch.h"
 #include "romfontexpand.h"
@@ -225,6 +226,9 @@ EVT_BEGIN(funnyCutscene)
     USER_FUNC(spm::evt_npc::evt_npc_set_anim, PTR("enma"), 0, 1) // Idle
     USER_FUNC(spm::evt_msg::evt_msg_print, EVT_MSG_FLAG_DIRECT, PTR("<p>Luvbi, you're coming with me.<k>"), 0, PTR("enma"))
     RUN_EVT_ID(luvbiAsyncWalking, LW(0))
+    USER_FUNC(evtbackup::evt_backupLocalWork, 0, LW(0))
+    SET(LW(0), 5)
+    USER_FUNC(evtbackup::evt_restoreLocalWork, LW(0), 0)
     USER_FUNC(spm::evt_npc::evt_npc_set_anim, PTR("enma"), 1, 1) // Walking
     USER_FUNC(spm::evt_npc::evt_npc_walk_to, PTR("enma"), 1100, 0, 0, FLOAT(80.0), 1, 0, 0)
     USER_FUNC(spm::evt_npc::evt_npc_set_anim, PTR("enma"), 0, 1) // Idle
