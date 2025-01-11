@@ -9,6 +9,8 @@ namespace mod::evtbackup {
   EvtVar restoreLocalWork(s32 index, EvtEntry * evtEntry);
   void destroyStack(s32 index);
 
+  //note: index is equal to LW value (i.e the index for LW(0) would be zero)
+
   // evt_backupLocalWork(s32 index, EvtVar value)
   EVT_DECLARE_USER_FUNC(evt_backupLocalWork, 2)
 
