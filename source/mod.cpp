@@ -277,10 +277,6 @@ EVT_BEGIN(funnyCutscene)
     USER_FUNC(spm::evt_seq::evt_seq_mapchange, PTR("ls4_11"), 0)
 RETURN_FROM_CALL()
 
-EVT_BEGIN(waiting)
-WAIT_MSEC(3000)
-EVT_END()
-
 spm::evtmgr::EvtScriptCode testCall[] = { USER_FUNC(spm::evt_msg::evt_msg_print, EVT_MSG_FLAG_DIRECT, PTR("<p>I do, indeed, have a Pure\nHeart to offer to you, heroes.\n<k><p>However, I cannot give it\nto you as promised.<k>"), 0, PTR("enma")) };
 
 void main()
