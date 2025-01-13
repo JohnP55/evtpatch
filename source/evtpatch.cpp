@@ -261,6 +261,9 @@ void replaceEvt(EvtScriptCode* script, s32 line, EvtScriptCode* dst, s32 size) {
 void replaceEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst, s32 size) {
     EvtScriptCode* src = script + offset;
     assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:");
+    u8 argNum1 = (script[1] << 8) | script[0];
+    u8 argNum2 = (dst[1] << 8) | dst[0];
+    assert(argNum1 > argNum2, "Replacement instruction too large");
 
     u32 instructionLength = sizeof(*dst) / sizeof(EvtScriptCode);
     u32 lenOriginalInstructions = getInstructionBlockLength(src, instructionLength);

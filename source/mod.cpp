@@ -277,7 +277,7 @@ EVT_BEGIN(funnyCutscene)
     USER_FUNC(spm::evt_seq::evt_seq_mapchange, PTR("ls4_11"), 0)
 RETURN_FROM_CALL()
 
-spm::evtmgr::EvtScriptCode testCall[] = { USER_FUNC(spm::evt_msg::evt_msg_print, EVT_MSG_FLAG_DIRECT, PTR("<p>I do, indeed, have a Pure\nHeart to offer to you, heroes.\n<k><p>However, I cannot give it\nto you as promised.<k>"), 0, PTR("enma")) };
+spm::evtmgr::EvtScriptCode testCall[] = { WAIT_MSEC(1000) };
 
 void main()
 {
@@ -294,7 +294,7 @@ void main()
     spm::evtmgr::EvtScriptCode* jaydesRequestLink = evtpatch::getEvtInstruction(an1_04_md->initScript, 139);
     spm::evtmgr::EvtScriptCode* jaydesRequest = reinterpret_cast<spm::evtmgr::EvtScriptCode*>(evtpatch::getInstructionArgv(jaydesRequestLink)[3]);
     evtpatch::hookEvtReplaceBlock(jaydesRequest, 25, (spm::evtmgr::EvtScriptCode*)funnyCutscene, 179);
-    evtpatch::replaceEvt(jaydesRequest, 1, testCall, sizeof(testCall));
+    //evtpatch::replaceEvt(jaydesRequest, 1, testCall, sizeof(testCall)); //evtreplace example
 }
 
 }
