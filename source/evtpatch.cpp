@@ -270,7 +270,7 @@ void replaceEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst, s
     u32 sizeOriginalInstructions = lenOriginalInstructions * sizeof(EvtScriptCode);
 
     msl::string::memset(src, 0, sizeOriginalInstructions); // pad anything left with 0s
-    insertScriptCall(src, dst, size);
+    insertScriptCode(src, dst, size);
 }
 
 /// @brief Adds a hook to another evt script, without preserving original instructions
