@@ -206,17 +206,6 @@ void insertTrampolineCall(EvtScriptCode* ptr, EvtScriptCode* script) {
     ptr[TRAMPOLINE_CALL_EVT_OFFSET] = reinterpret_cast<s32>(script);
 }
 
-/// @brief Patches a script with another script of an equal or smaller size
-/// @param ptr The place to write the instruction at
-/// @param scriptCode The EvtScriptCode to replace the destination with
-/// @param dst The size of dst
-static void insertScriptCode(EvtScriptCode* ptr, EvtScriptCode* scriptCode, s32 size) {
-    //wii::os::OSReport("%x %x %x %x\n", (unsigned char)ptr[0], (unsigned char)ptr[1], (unsigned char)ptr[2], (unsigned char)ptr[3]);
-    //wii::os::OSReport("%x %x %x %x\n", (unsigned char)scriptCode[0], (unsigned char)scriptCode[1], (unsigned char)scriptCode[2], (unsigned char)scriptCode[3]);
-    msl::string::memcpy(ptr, scriptCode, size);
-    //wii::os::OSReport("%x %x %x %x\n", (unsigned char)ptr[0], (unsigned char)ptr[1], (unsigned char)ptr[2], (unsigned char)ptr[3]);
-}
-
 /// @brief Hooks into an evt script, automatically preserving original instructions
 /// @param script The evt script that will be hooked into
 /// @param line The line number to hook at, 1-indexed
@@ -268,7 +257,7 @@ void replaceEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst, s
     u32 sizeOriginalInstructions = lenOriginalInstructions * sizeof(EvtScriptCode);
 
     msl::string::memset(src, 0, sizeOriginalInstructions); // pad anything left with 0s
-    insertScriptCode(src, dst, size);
+    msl::string::memcpy(src, dst, size);
 }
 
 /// @brief Adds a hook to another evt script, without preserving original instructions
