@@ -53,7 +53,7 @@ TARGET		:=	$(notdir $(CURDIR)).$(VERSION)
 BUILD		:=	build.$(VERSION)
 SOURCES		:=	source $(wildcard source/*)
 DATA		:=	data
-INCLUDES	:=	include spm-headers/include spm-headers/mod vendor/EABase/include/Common vendor/EABase/include/Common vendor/EASTL/include
+INCLUDES	:=	include spm-headers/include spm-headers/mod
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -61,7 +61,7 @@ INCLUDES	:=	include spm-headers/include spm-headers/mod vendor/EABase/include/Co
 
 MACHDEP		= -mno-sdata -mgcn -DGEKKO -mcpu=750 -meabi -mhard-float
 
-CFLAGS		= -nostdlib -ffunction-sections -fdata-sections -g -O3 -Wall $(MACHDEP) $(INCLUDE) -fpermissive -D__powerpc__ -DEA_PLATFORM_LINUX
+CFLAGS		= -nostdlib -ffunction-sections -fdata-sections -g -O3 -Wall $(MACHDEP) $(INCLUDE) -fpermissive 
 CXXFLAGS	= -fno-exceptions -fno-rtti -std=gnu++17 $(CFLAGS)
 
 LDFLAGS		= -r -e _prolog -u _prolog -u _epilog -u _unresolved -Wl,--gc-sections -nostdlib -g $(MACHDEP) -Wl,-Map,$(notdir $@).map
