@@ -233,31 +233,25 @@ void hookEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst) {
     insertTrampolineCall(src, dynamicEvtForwarder);
 }
 
-/// @brief Replaces an EvtScriptCode
-/// @param script The EvtScriptCode that will be replaced
-/// @param line The line number to hook at, 1-indexed
-/// @param dst The EvtScriptCode that will be executed
-/// @param size The size of dst
-/// @example evtpatch::replaceEvt(jaydesRequest, 1, testCall, sizeof(testCall));
-void replaceEvt(EvtScriptCode* script, s32 line, EvtScriptCode* dst, s32 size) {
-    replaceEvtByOffset(script, getLineOffset(script, line), dst, size);
+/// @brief Patches a single instruction in a script with another instruction of the same size or smaller
+/// @param script The script that will be patched
+/// @param line The line number of the instruction to patch, 1-indexed
+/// @param replacement The instruction
+void patchEvtInstruction(EvtScriptCode* script, s32 line, EvtScriptCode* replacement) {
+    patchEvtInstructionByOffset(script, getLineOffset(script, line), replacement);
 }
-/// @brief Replaces an EvtScriptCode
-/// @param script The EvtScriptCode that will be replaced
-/// @param offset The offset to hook at, in EvtScriptCodes, from the start of the script
-/// @param dst The EvtScriptCode that will be executed
-/// @param size The size of dst
-void replaceEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst, s32 size) {
+
+/// @brief Patches a single instruction in a script with another instruction of the same size or smaller
+/// @param script The script that will be patched
+/// @param line The line number of the instruction to patch, 1-indexed
+/// @param replacement The patched instruction
+void patchEvtInstructionByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* replacement) {
     EvtScriptCode* src = script + offset;
     assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:");
-    assert(getInstructionLength(script) >= getInstructionLength(dst), "Replacement instruction too large");
+    assert(getInstructionLength(src) >= getInstructionLength(replacement), "Replacement instruction too large; use hookEvtReplace");
 
-    u32 instructionLength = sizeof(*dst) / sizeof(EvtScriptCode);
-    u32 lenOriginalInstructions = getInstructionBlockLength(src, instructionLength);
-    u32 sizeOriginalInstructions = lenOriginalInstructions * sizeof(EvtScriptCode);
-
-    msl::string::memset(src, 0, sizeOriginalInstructions); // pad anything left with 0s
-    msl::string::memcpy(src, dst, size);
+    msl::string::memset(src, 0, getInstructionLength(src)); // pad anything left with 0s
+    msl::string::memcpy(src, replacement, getInstructionSize(replacement));
 }
 
 /// @brief Adds a hook to another evt script, without preserving original instructions
