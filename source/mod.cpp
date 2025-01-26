@@ -277,7 +277,7 @@ EVT_BEGIN(funnyCutscene)
     USER_FUNC(spm::evt_seq::evt_seq_mapchange, PTR("ls4_11"), 0)
 RETURN_FROM_CALL()
 
-spm::evtmgr::EvtScriptCode testPatch[] = { WAIT_MSEC(1000) };
+spm::evtmgr::EvtScriptCode testPatch[] = { WAIT_MSEC(5000) };
 
 void main()
 {
@@ -294,7 +294,7 @@ void main()
     spm::evtmgr::EvtScriptCode* jaydesRequestLink = evtpatch::getEvtInstruction(an1_04_md->initScript, 139);
     spm::evtmgr::EvtScriptCode* jaydesRequest = reinterpret_cast<spm::evtmgr::EvtScriptCode*>(evtpatch::getInstructionArgv(jaydesRequestLink)[3]);
     evtpatch::hookEvtReplaceBlock(jaydesRequest, 25, (spm::evtmgr::EvtScriptCode*)funnyCutscene, 179);
-    evtpatch::patchEvtInstruction(jaydesRequest, 1, testPatch); //patchEvt example
+    evtpatch::patchEvtInstruction(jaydesRequest, 3, testPatch); //patchEvt example
 }
 
 }
