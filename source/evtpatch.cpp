@@ -213,6 +213,7 @@ void insertTrampolineCall(EvtScriptCode* ptr, EvtScriptCode* script) {
 void hookEvt(EvtScriptCode* script, s32 line, EvtScriptCode* dst) {
     hookEvtByOffset(script, getLineOffset(script, line), dst);
 }
+
 /// @brief Hooks into an evt script, automatically preserving original instructions
 /// @param script The evt script that will be hooked into
 /// @param offset The offset to hook at, in EvtScriptCodes, from the start of the script
@@ -230,6 +231,27 @@ void hookEvtByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* dst) {
     msl::string::memcpy(dynamicEvtForwarder + TRAMPOLINE_CALL_LENGTH + lenOriginalInstructions, trampolineReturnFromCall, TRAMPOLINE_RETURN_FROM_CALL_SIZE); // add return
     msl::string::memset(src, 0, sizeOriginalInstructions); // pad anything left with 0s
     insertTrampolineCall(src, dynamicEvtForwarder);
+}
+
+/// @brief Patches a single instruction in a script with another instruction of the same size or smaller
+/// @param script The script that will be patched
+/// @param line The line number of the instruction to patch, 1-indexed
+/// @param replacement The instruction
+void patchEvtInstruction(EvtScriptCode* script, s32 line, EvtScriptCode* replacement) {
+    patchEvtInstructionByOffset(script, getLineOffset(script, line), replacement);
+}
+
+/// @brief Patches a single instruction in a script with another instruction of the same size or smaller
+/// @param script The script that will be patched
+/// @param line The line number of the instruction to patch, 1-indexed
+/// @param replacement The patched instruction
+void patchEvtInstructionByOffset(EvtScriptCode* script, s32 offset, EvtScriptCode* replacement) {
+    EvtScriptCode* src = script + offset;
+    assert(isStartOfInstruction(src), "Cannot hook on non-instruction, what are you doing :sob:");
+    assert(getInstructionLength(src) >= getInstructionLength(replacement), "Replacement instruction too large; use hookEvtReplace");
+
+    msl::string::memset(src, 0, getInstructionLength(src)); // pad anything left with 0s
+    msl::string::memcpy(src, replacement, getInstructionSize(replacement));
 }
 
 /// @brief Adds a hook to another evt script, without preserving original instructions

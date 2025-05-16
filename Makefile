@@ -7,13 +7,9 @@ ifeq ($(strip $(DEVKITPPC)),)
 $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
 endif
 
-ifeq ($(strip $(TTYDTOOLS)),)
-$(error "Please set TTYDTOOLS in your environment. export TTYDTOOLS=<path to>ttyd-tools")
-endif
-
 include $(DEVKITPPC)/wii_rules
 
-export ELF2REL	:=	$(TTYDTOOLS)/bin/elf2rel
+export ELF2REL	:=	pyelf2rel
 
 ifeq ($(VERSION),)
 all: us0 us1 us2 jp0 jp1 eu0 eu1 kr0
@@ -56,7 +52,7 @@ else
 TARGET		:=	$(notdir $(CURDIR)).$(VERSION)
 BUILD		:=	build.$(VERSION)
 SOURCES		:=	source $(wildcard source/*)
-DATA		:=	data  
+DATA		:=	data
 INCLUDES	:=	include spm-headers/include spm-headers/mod
 
 #---------------------------------------------------------------------------------
@@ -65,7 +61,7 @@ INCLUDES	:=	include spm-headers/include spm-headers/mod
 
 MACHDEP		= -mno-sdata -mgcn -DGEKKO -mcpu=750 -meabi -mhard-float
 
-CFLAGS		= -nostdlib -ffunction-sections -fdata-sections -g -O3 -Wall $(MACHDEP) $(INCLUDE)
+CFLAGS		= -nostdlib -ffunction-sections -fdata-sections -g -O3 -Wall $(MACHDEP) $(INCLUDE) -fpermissive 
 CXXFLAGS	= -fno-exceptions -fno-rtti -std=gnu++17 $(CFLAGS)
 
 LDFLAGS		= -r -e _prolog -u _prolog -u _epilog -u _unresolved -Wl,--gc-sections -nostdlib -g $(MACHDEP) -Wl,-Map,$(notdir $@).map
@@ -200,7 +196,7 @@ $(OFILES_SOURCES) : $(HFILES)
 # REL linking
 %.rel: %.elf
 	@echo output ... $(notdir $@)
-	@$(ELF2REL) $< -s $(MAPFILE)
+	$(ELF2REL) $< $(MAPFILE)
 
 #---------------------------------------------------------------------------------
 # This rule links in binary data with the .jpg extension
